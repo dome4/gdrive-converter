@@ -13,7 +13,7 @@ import json
 import io
 
 # Setup the Drive v3 API
-SCOPES = 'https://www.googleapis.com/auth/drive.metadata.readonly'
+SCOPES = 'https://www.googleapis.com/auth/drive.readonly'
 store = file.Storage('credentials.json')
 creds = store.get()
 if not creds or creds.invalid:
@@ -35,7 +35,7 @@ service = build('drive', 'v3', http=creds.authorize(Http()))
 
 
 
-def loopFolder(current_path):
+def loopFolder(gdrive, current_path):
     
     for filename in os.listdir(current_path):
         
@@ -49,21 +49,50 @@ def loopFolder(current_path):
                 data = json.load(data_file)
                 file_id = data ['doc_id']
 
-                downloadFile(filename, file_id, current_path)
+                downloadFile(gdrive, filename, file_id, current_path)
+
+                # ToDo remove old file
             
         elif os.path.isdir(os.path.join(current_path, filename)):
             # check if file is folder
 
             folder_path_complete = os.path.join(current_path, filename)
-            loopFolder(folder_path_complete) # recursive method call
+            loopFolder(gdrive, folder_path_complete) # recursive method call
 
    
 
-def downloadFile(filename, file_id, file_path):
+def downloadFile(gdrive, filename, file_id, file_path):
+
+                
+    if filename.endswith(".gdoc"):
+        request = gdrive.files().export_media(fileId=file_id, mimeType='application/vnd.openxmlformats-officedocument.wordprocessingml.document')
+        filename = filename[:-5] # remove file type     
+        filename = filename + '.docx'
+        
+    elif filename.endswith(".gsheet"):
+        request = gdrive.files().export_media(fileId=file_id, mimeType='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        filename = filename[:-7] # remove file type     
+        filename = filename + '.xlsx' 
+            
+    elif filename.endswith(".gslides"):
+        request = gdrive.files().export_media(fileId=file_id, mimeType='application/vnd.openxmlformats-officedocument.presentationml.presentation')
+        filename = filename[:-8] # remove file type     
+        filename = filename + '.pptx'
+
+    """
+    download files
+    """ 
+    response = request.execute()
+
+    """
+    save response in file
+    """
+    with open(os.path.join(file_path, filename), "wb") as writeStream:
+        writeStream.write(response)
 
     print ('{0} | id: {1} - download started'.format(filename, file_id))
 
 
 # start method
 root_folder = os.path.join('/home/dominic/Desktop/11_IT')
-loopFolder(root_folder) 
+loopFolder(service, root_folder) 
