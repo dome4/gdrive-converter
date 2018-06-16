@@ -59,8 +59,10 @@ def loopFolder(gdrive, current_path):
 
                 downloadFile(gdrive, filename, file_id, current_path)
 
-                # remove old file
-                os.remove(file_path_complete)
+                data_file.close()
+
+            # remove old file
+            os.remove(file_path_complete)
             
         elif os.path.isdir(os.path.join(current_path, filename)):
             # check if file is folder
@@ -94,8 +96,9 @@ def downloadFile(gdrive, filename, file_id, file_path):
     response = request.execute()
 
     # save response in file
-    with open(os.path.join(file_path, filename), "wb") as writeStream:
+    with io.open(os.path.join(file_path, filename), "wb") as writeStream:
         writeStream.write(response)
+        writeStream.close()
 
     print ('{0} | id: {1} - file download finished'.format(filename, file_id))
  
