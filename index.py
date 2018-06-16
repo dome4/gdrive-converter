@@ -1,10 +1,3 @@
-"""
-Shows basic usage of the Drive v3 API.
-
-Creates a Drive v3 API service and prints the names and ids of the last 10 files
-the user has access to.
-"""
-from __future__ import print_function
 from googleapiclient.discovery import build
 from httplib2 import Http
 from oauth2client import file, client, tools
@@ -21,6 +14,9 @@ def main():
     root_folder = os.path.join('/home/dominic/Desktop/11_IT')
     loopFolder(gdrive, root_folder)
 
+"""
+google oauth
+"""
 def auth():
     # Setup the Drive v3 API
     SCOPES = 'https://www.googleapis.com/auth/drive.readonly'
@@ -34,7 +30,9 @@ def auth():
 
     return service
 
-
+"""
+loop through folder
+"""
 def loopFolder(gdrive, current_path):
     
     for filename in os.listdir(current_path):
@@ -51,7 +49,8 @@ def loopFolder(gdrive, current_path):
 
                 downloadFile(gdrive, filename, file_id, current_path)
 
-                # ToDo remove old file
+                # remove old file
+                os.remove(file_path_complete)
             
         elif os.path.isdir(os.path.join(current_path, filename)):
             # check if file is folder
@@ -60,7 +59,9 @@ def loopFolder(gdrive, current_path):
             loopFolder(gdrive, folder_path_complete) # recursive method call
 
    
-
+"""
+download google files
+"""
 def downloadFile(gdrive, filename, file_id, file_path):
 
                 
@@ -79,14 +80,10 @@ def downloadFile(gdrive, filename, file_id, file_path):
         filename = filename[:-8] # remove file type     
         filename = filename + '.pptx'
 
-    """
-    download files
-    """ 
+    # download files
     response = request.execute()
 
-    """
-    save response in file
-    """
+    # save response in file
     with open(os.path.join(file_path, filename), "wb") as writeStream:
         writeStream.write(response)
 
