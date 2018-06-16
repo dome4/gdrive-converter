@@ -4,6 +4,7 @@ from oauth2client import file, client, tools
 import os
 import json
 import io
+import sys
 
 """
 main method of the script
@@ -11,7 +12,16 @@ main method of the script
 def main():
     gdrive = auth()
 
-    root_folder = os.path.join('/home/dominic/Desktop/11_IT')
+    args1 = None
+    
+    try:
+        # get root folder as argument
+        args1 = sys.argv[1]
+    except IndexError:
+        print('Pleade add the root folder as first argument and try again')
+
+    root_folder = os.path.join(args1)
+
     loopFolder(gdrive, root_folder)
 
 """
